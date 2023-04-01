@@ -32,6 +32,9 @@ target("test")
 	add_files("test/*.cpp")
 	add_deps("eblas")
 	add_packages("nanobench", "openblas", "fmt")
-	add_cxxflags("-mavx2", "-mfma")
+	add_cxxflags("-mfma")
+	add_vectorexts("avx2", "neon")
 	set_warnings("allextra")
-	set_optimize("fastest") -- -O3
+	if is_mode("release") then
+		set_optimize("fastest") -- -O3
+	end
