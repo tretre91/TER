@@ -2,6 +2,7 @@
 
 /.xmake/
 /.cache/
+/db/
 
 /compile_commands.json
 

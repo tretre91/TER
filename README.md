@@ -1,6 +1,11 @@
 # eblas
 
-A C++ implementation of blas matraix-matrix multiplication routines (xgemm).
+A C++ implementation of blas matrix-matrix multiplication routines (xgemm).
+
+## TODO
+
+- Microkernels
+- Real tests
 
 ## Build
 
