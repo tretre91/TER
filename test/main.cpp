@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 		B[i] = i;
 	}
 
-	std::vector<float> C(dim * dim);	
+	std::vector<float> C(dim * dim);
 
 	auto oldC = C;
 
@@ -45,8 +45,6 @@ int main(int argc, char* argv[]) {
 	eblas::sgemm(eblas::transposition::none, eblas::transposition::none, dim, dim, dim, alpha, A.data(), dim, B.data(), dim, beta, C.data(), dim);
 	util::check_matrix(dim, dim, dim, alpha, beta, A, B, oldC, C);
 	C = oldC;
-	naive_mm(dim, dim, dim, alpha, A.data(), dim, B.data(), dim, beta, C.data(), dim);
-	util::check_matrix(dim, dim, dim, alpha, beta, A, B, oldC, C);
 
 	using namespace ankerl;
 
@@ -55,8 +53,12 @@ int main(int argc, char* argv[]) {
 
 	C = oldC;
 	bench.run("my impl", [&]() { eblas::sgemm(eblas::transposition::none, eblas::transposition::none, dim, dim, dim, alpha, A.data(), dim, B.data(), dim, beta, C.data(), dim); });
+
 	C = oldC;
 	bench.run("open_blas", [&]() { cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, dim, dim, dim, alpha, A.data(), dim, B.data(), dim, beta, C.data(), dim); });
-	C = oldC;
-	bench.run("naive", [&]() { naive_mm(dim, dim, dim, alpha, A.data(), dim, B.data(), dim, beta, C.data(), dim); });
+
+	if (dim <= 1024) {
+		C = oldC;
+		bench.run("naive", [&]() { naive_mm(dim, dim, dim, alpha, A.data(), dim, B.data(), dim, beta, C.data(), dim); });
+	}
 }
