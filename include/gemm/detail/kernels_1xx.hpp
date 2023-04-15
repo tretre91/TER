@@ -1,13 +1,10 @@
-#ifndef EBLAS_KERNELS_HPP
-#define EBLAS_KERNELS_HPP
+#ifndef GEMM_KERNELS_1XX_HPP
+#define GEMM_KERNELS_1XX_HPP
 
 #include <eve/eve.hpp>
 
-namespace eblas::detail
+namespace gemm::detail
 {
-	template<typename T>
-	using kernel = void (*)(int, int, int, const T*, int, const T*, int, T*, int);
-
 	///////////////////////////////////////
 	//            1x1 kernels            //
 	///////////////////////////////////////
@@ -80,8 +77,8 @@ namespace eblas::detail
 	void kernel_142(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 		const wide_t wa{a};
-		c[0] += eve::reduce(wa, wide_t{b[0], b[stride_b], b[2 * stride_b], b[3 * stride_b]});
-		c[1] += eve::reduce(wa, wide_t{b[1], b[stride_b + 1], b[2 * stride_b + 1], b[3 * stride_b + 1]}); // TODO
+		c[0] += eve::reduce(wa * wide_t{b[0], b[stride_b], b[2 * stride_b], b[3 * stride_b]});
+		c[1] += eve::reduce(wa * wide_t{b[1], b[stride_b + 1], b[2 * stride_b + 1], b[3 * stride_b + 1]}); // TODO
 	}
 
 	template<typename T>
@@ -140,14 +137,6 @@ namespace eblas::detail
 		wc += a[6] * wide_t{b + 6 * stride_b} + a[7] * wide_t{b + 7 * stride_b};
 		eve::store(wc, c);
 	}
-
-
-	// TODO: faire 1, 2, 4, 8 pour l'instant
-	// regarder l'exemple de code reçu par mail pour le 2x2
-	template<typename T>
-	kernel<T> get_kernel(const int M, const int N, const int K) {
-		return nullptr; // TODO
-	}
-} // namespace eblas::detail
+} // namespace gemm::detail
 
 #endif

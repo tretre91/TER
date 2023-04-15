@@ -9,20 +9,12 @@ package("eve")
 	end)
 package_end()
 
-package("nanobench")
-	add_urls("https://github.com/martinus/nanobench.git")
-
-	on_install(function (package)
-		os.cp("src/include/nanobench.h", package:installdir("include"))
-	end)
-package_end()
-
-add_requires("eve", "nanobench v4.3.11", "fmt")
+add_requires("eve", "catch2 3.3.2", "nanobench 4.3.11", "fmt 9.1.0")
 add_requires("openblas", {system = true})
 
-target("eblas")
+target("gemm")
 	set_kind("headeronly")
-	add_headerfiles("include/*.hpp")
+	add_headerfiles("include/gemm/**/*.hpp")
 	add_includedirs("include", {public = true})
 	add_packages("eve", {public = true})
 	set_warnings("allextra")
@@ -30,11 +22,7 @@ target("eblas")
 target("test")
 	set_kind("binary")
 	add_files("test/*.cpp")
-	add_deps("eblas")
-	add_packages("nanobench", "openblas", "fmt")
-	add_cxxflags("-mfma")
-	add_vectorexts("avx2", "neon")
+	add_deps("gemm")
+	add_packages("nanobench", "catch2", "openblas", "fmt")
+	add_cxxflags("-march=native")
 	set_warnings("allextra")
-	if is_mode("release") then
-		set_optimize("fastest") -- -O3
-	end
