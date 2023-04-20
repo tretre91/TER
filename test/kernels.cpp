@@ -16,13 +16,13 @@ TEST_CASE("Microkernels", "[kernels]") {
 	constexpr float alpha = 1.0f;
 	constexpr float beta = 1.0f;
 
-	const auto M = GENERATE(1, 2 /*, 4, 8*/);
-	const auto K = GENERATE(1, 2, 4, 8);
+	const auto M = GENERATE(range(1, 9));
+	const auto K = GENERATE(range(1, 9));
 
 	const auto A = util::random_vector<float>(M * K);
-	
-	const auto N = GENERATE(1, 2, 4, 8);
-	
+
+	const auto N = GENERATE(range(1, 9));
+
 	CAPTURE(M, N, K);
 
 	const auto B = util::random_vector<float>(K * N);
@@ -31,7 +31,7 @@ TEST_CASE("Microkernels", "[kernels]") {
 
 	// TODO: move benchmarks here?
 
-	gemm::detail::get_kernel<float>(M, N, K)(M, N, K, A.data(), K, B.data(), N, C.data(), N);
+	gemm::detail::get_kernel<float>(M, N, K)(A.data(), K, B.data(), N, C.data(), N);
 	util::openblas_sgemm(M, N, K, alpha, A, K, B, N, beta, C2, N);
 
 	for (std::size_t i = 0; i < C.size(); i++) {
@@ -69,7 +69,7 @@ TEST_CASE("Kernels benchmark", "[.benchmark][kernels]") {
 
 	bench.title(title);
 	auto* kernel = gemm::detail::get_kernel<float>(M, N, K);
-	bench.run("gemm", [=, &C] { kernel(M, N, K, A.data(), K, B.data(), N, C.data(), N); });
+	bench.run("gemm", [=, &C] { kernel(A.data(), K, B.data(), N, C.data(), N); });
 	C = oldC;
 	bench.run("naive", [=, &C] { util::naive_gemm(M, N, K, alpha, A.data(), K, B.data(), N, beta, C.data(), N); });
 	C = oldC;

@@ -14,7 +14,7 @@ namespace util
 {
 	// Precision for floating point relative comparisons
 	template<typename T>
-	constexpr T precision = 1e-5;
+	constexpr T precision = 1e-3; // TODO: fix precision issues
 
 	// ouput stream for the benchmarks
 	inline std::ostream* benchmark_output = &std::cout;

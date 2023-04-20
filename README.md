@@ -13,10 +13,16 @@ and have openblas installed on your system.
 
 - Integrate the kernels to the main matrix multiplication function
 - Microkernels
-	- [ ] Kernel composition function
+	- [x] Kernel composition function
 	- [x] 1x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 	- [x] 2x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 	- [ ] 4x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 	- [ ] 8x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 - Tests
+	- [x] Kernels
+	- [ ] Big matrices
+	- [ ] Fix precision issues
+- Benchmarks
+	- [ ] Kernels
+	- [ ] Big matrices
 

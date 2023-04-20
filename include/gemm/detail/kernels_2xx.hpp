@@ -10,13 +10,13 @@ namespace gemm::detail
 	///////////////////////////////////////
 
 	template<typename T>
-	void kernel_211(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_211(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		c[0] += a[0] * *b;
-		c[stride_c] += a[stride_c] * *b;
+		c[stride_c] += a[stride_a] * *b;
 	}
 
 	template<typename T>
-	void kernel_212(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_212(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		c[0] += a[0] * b[0];
 		c[1] += a[0] * b[1];
 		c[stride_c] += a[stride_a] * b[0];
@@ -24,14 +24,14 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_214(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_214(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 		eve::store(eve::fma(a[0], wide_t{b}, wide_t{c}), c);
 		eve::store(eve::fma(a[stride_a], wide_t{b}, wide_t{c + stride_c}), c + stride_c);
 	}
 
 	template<typename T>
-	void kernel_218(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_218(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<8>>;
 		eve::store(eve::fma(a[0], wide_t{b}, wide_t{c}), c);
 		eve::store(eve::fma(a[stride_a], wide_t{b}, wide_t{c + stride_c}), c + stride_c);
@@ -42,13 +42,13 @@ namespace gemm::detail
 	///////////////////////////////////////
 
 	template<typename T>
-	void kernel_221(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_221(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		c[0] += a[0] * b[0] + a[1] * b[stride_b];
 		c[stride_c] += a[stride_a] * b[0] + a[stride_a + 1] * b[stride_b];
 	}
 
 	template<typename T>
-	void kernel_222(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_222(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 		const wide_t wa{a[0], a[1], a[stride_a], a[stride_a + 1]};
 		const wide_t wb{b[0], b[1], b[stride_b], b[stride_b + 1]};
@@ -66,7 +66,7 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_224(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_224(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 		const wide_t wb0{b};
 		const wide_t wb1{b + stride_b};
@@ -85,7 +85,7 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_228(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_228(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<8>>;
 		const wide_t wb0{b};
 		const wide_t wb1{b + stride_b};
@@ -104,7 +104,7 @@ namespace gemm::detail
 	///////////////////////////////////////
 
 	template<typename T>
-	void kernel_241(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_241(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 		const wide_t wa0{a};
 		const wide_t wa1{a + stride_a};
@@ -115,7 +115,7 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_242(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_242(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 		const wide_t wa0{a};
 		const wide_t wa1{a + stride_a};
@@ -129,7 +129,7 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_244(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_244(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		// consider using the same code as kernel_248 with `wide_t = eve::wide<T, eve::fixed<4>>`
 		using wide_t = eve::wide<T, eve::fixed<8>>;
 		using half_t = eve::wide<T, eve::fixed<4>>;
@@ -162,7 +162,7 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_248(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_248(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<8>>;
 		const wide_t wb0{b};
 		const wide_t wb1{b + stride_b};
@@ -184,7 +184,7 @@ namespace gemm::detail
 
 
 	template<typename T>
-	void kernel_281(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_281(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<8>>;
 		const wide_t wa1{a};
 		const wide_t wa2{a + stride_a};
@@ -195,7 +195,7 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_282(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_282(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<8>>;
 		const wide_t wa0{a};
 		const wide_t wa1{a + stride_a};
@@ -211,7 +211,7 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_284(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_284(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 
 		const wide_t wb0{b};
@@ -238,7 +238,7 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_288(const int M, const int N, const int K, const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_288(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<8>>;
 
 		const wide_t wb0{b};
