@@ -12,6 +12,8 @@ and have openblas installed on your system.
 ## TODO
 
 - Integrate the kernels to the main matrix multiplication function
+	- [x] Have a working implementation
+	- [ ] Fix performance issues
 - Microkernels
 	- [x] Kernel composition function
 	- [x] 1x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
@@ -20,9 +22,10 @@ and have openblas installed on your system.
 	- [ ] 8x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 - Tests
 	- [x] Kernels
-	- [ ] Big matrices
+	- [x] Big matrices
 	- [ ] Fix precision issues
+	- [ ] Write a custom Catch2 reporter
 - Benchmarks
-	- [ ] Kernels
-	- [ ] Big matrices
+	- [x] Small matrices
+	- [x] Big matrices
 

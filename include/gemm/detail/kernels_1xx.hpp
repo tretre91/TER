@@ -50,17 +50,17 @@ namespace gemm::detail
 	template<typename T>
 	void kernel_124(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
-		wide_t cw{c};
-		cw += a[0] * wide_t{b} + a[1] * wide_t{b + stride_b};
-		eve::store(cw, c);
+		wide_t wc{c};
+		wc += a[0] * wide_t{b} + a[1] * wide_t{b + stride_b};
+		eve::store(wc, c);
 	}
 
 	template<typename T>
 	void kernel_128(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<8>>;
-		wide_t cw{c};
-		cw += a[0] * wide_t{b} + a[1] * wide_t{b + stride_b};
-		eve::store(cw, c);
+		wide_t wc{c};
+		wc += a[0] * wide_t{b} + a[1] * wide_t{b + stride_b};
+		eve::store(wc, c);
 	}
 
 	///////////////////////////////////////

@@ -10,8 +10,8 @@ int main(int argc, char* argv[]) {
 
 	using namespace Catch::Clara;
 	auto cli = session.cli()
-	           | Opt(bench_output_file, "benchmark output file")["--bench-output"]
-				 ("Output file were the benchmark results will be stored instead of stdout");
+	           | Opt(bench_output_file, "filename")["--bench-output"]
+				 ("Output file where the benchmark results will be stored instead of outputing to stdout");
 
 	session.cli(cli);
 
@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
 	if (!bench_output_file.empty()) {
 		file.open(bench_output_file);
 		util::benchmark_output = &file;
+		util::bench.output(util::benchmark_output);
 	}
 
 	return session.run();

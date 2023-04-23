@@ -191,7 +191,7 @@ namespace gemm::detail
 	constexpr auto kernels_table = generate_kernel_table<T>();
 
 	/**
-	 *	@brief Returns the kernel for multiplying a MxK matrix with a KxN matrix.
+	 * @brief Returns the kernel for multiplying a MxK matrix with a KxN matrix.
 	 */
 	template<typename T>
 	constexpr kernel<T> get_kernel(const int M, const int N, const int K) {
