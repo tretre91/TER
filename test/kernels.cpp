@@ -28,7 +28,7 @@ TEST_CASE("Microkernels", "[kernels][small]") {
 	auto C2 = C;
 
 	gemm::detail::get_kernel<float>(M, N, K)(A.data(), K, B.data(), N, C.data(), N);
-	cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, CBLAS_TRANSPOSE::CblasNoTrans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C2.data(), N);
+	cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C2.data(), N);
 
 	for (std::size_t i = 0; i < C.size(); i++) {
 		CAPTURE(i);

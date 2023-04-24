@@ -36,7 +36,7 @@ namespace gemm::detail
 	}
 
 	/**
-	 * @brief Get the highest value y such that y < x && pred(y) == true.
+	 * @brief Get the highest value y such that y <= x && pred(y) == true.
 	 */
 	template<typename Predicate>
 	constexpr int get_previous_valid_value(int x, Predicate pred) {
@@ -47,8 +47,8 @@ namespace gemm::detail
 	}
 
 	/**
-	 *	@brief Creates a kernel which can multiply MxK and KxN matrices.
-	 *	This function combines multiple handwritten kernels in order to handle other dimensions.
+	 * @brief Creates a kernel which can multiply MxK and KxN matrices.
+	 * This function combines multiple handwritten kernels in order to handle other dimensions.
 	 */
 	template<typename T, int M, int N, int K>
 		requires(M > 0 && N > 0 && K > 0)
@@ -158,7 +158,7 @@ namespace gemm::detail
 		kernels[kernel_index(8,8,8)] = &kernel_888;
 		*/
 
-		// adding the composed kernels
+		// add the composed kernels
 		const auto dimensions = std::integer_sequence<int, 1, 2, 3, 4, 5, 6, 7, 8>{};
 
 		auto set_kernel = [&]<int M, int N, int K>() {

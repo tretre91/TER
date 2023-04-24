@@ -10,8 +10,12 @@
 
 using Catch::Matchers::WithinRel;
 
+constexpr auto B2 = gemm::detail::B2<float>;
+constexpr auto B1 = gemm::detail::B1<float>;
+constexpr auto TILE_SIZE = gemm::detail::TILE_SIZE<float>;
+
 TEST_CASE("worst case", "[square][large][special]") {
-	constexpr auto dim = gemm::detail::B2 + gemm::detail::B1 + gemm::detail::BT<float> + 1;
+	constexpr auto dim = B2 + B1 + TILE_SIZE + 1;
 
 	const auto A = util::random_vector<float>(dim * dim);
 	const auto B = util::random_vector<float>(dim * dim);
@@ -21,8 +25,8 @@ TEST_CASE("worst case", "[square][large][special]") {
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
 
-	gemm::sgemm(gemm::transposition::none, gemm::transposition::none, dim, dim, dim, alpha, A.data(), dim, B.data(), dim, beta, C.data(), dim);
-	cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, CBLAS_TRANSPOSE::CblasNoTrans, dim, dim, dim, alpha, A.data(), dim, B.data(), dim,
+	gemm::sgemm(util::no_trans, util::no_trans, dim, dim, dim, alpha, A.data(), dim, B.data(), dim, beta, C.data(), dim);
+	cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, dim, dim, dim, alpha, A.data(), dim, B.data(), dim,
 	  beta, C2.data(), dim);
 
 	for (std::size_t i = 0; i < C.size(); i++) {
@@ -34,7 +38,7 @@ TEST_CASE("worst case", "[square][large][special]") {
 TEST_CASE("dot product", "[large][special]") {
 	constexpr int M = 1;
 	constexpr int N = 1;
-	constexpr int K = gemm::detail::B2 + gemm::detail::B1 + gemm::detail::BT<float> + 1;
+	constexpr int K = B2 + B1 + TILE_SIZE + 1;
 
 	const auto A = util::random_vector<float>(M * K);
 	const auto B = util::random_vector<float>(K * N);
@@ -44,8 +48,8 @@ TEST_CASE("dot product", "[large][special]") {
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
 
-	gemm::sgemm(gemm::transposition::none, gemm::transposition::none, M, N, K, alpha, A.data(), K, B.data(), N, beta, C.data(), N);
-	cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, CBLAS_TRANSPOSE::CblasNoTrans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C2.data(), N);
+	gemm::sgemm(util::no_trans, util::no_trans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C.data(), N);
+	cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C2.data(), N);
 
 	for (std::size_t i = 0; i < C.size(); i++) {
 		CAPTURE(i);
@@ -54,8 +58,8 @@ TEST_CASE("dot product", "[large][special]") {
 }
 
 TEST_CASE("outer product", "[large][special]") {
-	constexpr int M = gemm::detail::B2 + gemm::detail::B1 + gemm::detail::BT<float> + 1;;
-	constexpr int N = gemm::detail::B2 + gemm::detail::B1 + gemm::detail::BT<float> + 1;;
+	constexpr int M = B2 + B1 + TILE_SIZE + 1;;
+	constexpr int N = B2 + B1 + TILE_SIZE + 1;;
 	constexpr int K = 1;
 
 	const auto A = util::random_vector<float>(M * K);
@@ -66,8 +70,8 @@ TEST_CASE("outer product", "[large][special]") {
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
 
-	gemm::sgemm(gemm::transposition::none, gemm::transposition::none, M, N, K, alpha, A.data(), K, B.data(), N, beta, C.data(), N);
-	cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, CBLAS_TRANSPOSE::CblasNoTrans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C2.data(), N);
+	gemm::sgemm(util::no_trans, util::no_trans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C.data(), N);
+	cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C2.data(), N);
 
 	for (std::size_t i = 0; i < C.size(); i++) {
 		CAPTURE(i);
@@ -76,7 +80,7 @@ TEST_CASE("outer product", "[large][special]") {
 }
 
 TEST_CASE("column", "[large][special]") {
-	constexpr int M = gemm::detail::B2 + gemm::detail::B1 + gemm::detail::BT<float> + 1;
+	constexpr int M = B2 + B1 + TILE_SIZE + 1;
 	constexpr int N = 1;
 	constexpr int K = 1;
 
@@ -88,8 +92,8 @@ TEST_CASE("column", "[large][special]") {
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
 
-	gemm::sgemm(gemm::transposition::none, gemm::transposition::none, M, N, K, alpha, A.data(), K, B.data(), N, beta, C.data(), N);
-	cblas_sgemm(CBLAS_ORDER::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, CBLAS_TRANSPOSE::CblasNoTrans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C2.data(), N);
+	gemm::sgemm(util::no_trans, util::no_trans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C.data(), N);
+	cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, A.data(), K, B.data(), N, beta, C2.data(), N);
 
 	for (std::size_t i = 0; i < C.size(); i++) {
 		CAPTURE(i);

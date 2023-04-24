@@ -1,4 +1,3 @@
-#include "catch2/catch_section_info.hpp"
 #include <catch2/catch_config.hpp>
 #include <catch2/catch_test_case_info.hpp>
 #include <catch2/reporters/catch_reporter_registrars.hpp>
@@ -18,7 +17,7 @@ private:
 	using Catch::StreamingReporterBase::StreamingReporterBase;
 
 	Catch::Verbosity m_verbosityLevel;
-	bool m_isImplicitSection = false; // necessary because test cases contains implciti sections
+	std::string m_currentTestCase = "";
 
 public:
 	static std::string getDescription() { return "Reporter indicating which benchmark is currently being run"; }
@@ -42,19 +41,18 @@ public:
 	void testCaseStarting(const Catch::TestCaseInfo& info) override {
 		Catch::StreamingReporterBase::testCaseStarting(info);
 
-		const auto title = fmt::format("## Benchmark \"{}\"", info.name);
+		const auto title = fmt::format("\n## Benchmark \"{}\"", info.name);
 		fmt::print(m_stream, "{}\n", title);
 		if (m_verbosityLevel == Catch::Verbosity::High) {
 			fmt::print("{}\n", title);
 		}
-		m_isImplicitSection = true;
+		m_currentTestCase = info.name;
 	}
 
 	void sectionStarting(const Catch::SectionInfo& info) override {
 		Catch::StreamingReporterBase::sectionStarting(info);
 
-		if (m_isImplicitSection) {
-			m_isImplicitSection = false;
+		if (info.name == m_currentTestCase) {
 			return;
 		}
 
@@ -63,8 +61,6 @@ public:
 		if (m_verbosityLevel == Catch::Verbosity::High) {
 			fmt::print("{}\n", title);
 		}
-
-		m_isImplicitSection = true;
 	}
 
 	void testCasePartialStarting(const Catch::TestCaseInfo& info, std::uint64_t partNumber) override {

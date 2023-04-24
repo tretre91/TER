@@ -10,17 +10,22 @@
 #include <random>
 #include <vector>
 
+#include <gemm/gemm.hpp>
+
 namespace util
 {
 	// Precision for floating point relative comparisons
 	template<typename T>
 	constexpr T precision = 1e-1; // TODO: fix precision issues
 
+	// transposition setting
+	constexpr auto no_trans = gemm::transposition::none;
+
 	// Current Catch2 session config data
 	inline Catch::ConfigData config_data;
 
 	// Benchmark runner
-	inline auto bench = ankerl::nanobench::Bench().warmup(10).minEpochTime(std::chrono::milliseconds{20}).relative(true);
+	inline auto bench = ankerl::nanobench::Bench().warmup(10).relative(true);
 
 	// Returns a random floating point value
 	template<typename T>

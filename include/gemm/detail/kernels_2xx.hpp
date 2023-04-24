@@ -10,13 +10,13 @@ namespace gemm::detail
 	///////////////////////////////////////
 
 	template<typename T>
-	void kernel_211(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_211(const T* a, const int stride_a, const T* b, const int /* stride_b */, T* c, const int stride_c) {
 		c[0] += a[0] * *b;
 		c[stride_c] += a[stride_a] * *b;
 	}
 
 	template<typename T>
-	void kernel_212(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_212(const T* a, const int stride_a, const T* b, const int /* stride_b */, T* c, const int stride_c) {
 		c[0] += a[0] * b[0];
 		c[1] += a[0] * b[1];
 		c[stride_c] += a[stride_a] * b[0];
@@ -24,14 +24,14 @@ namespace gemm::detail
 	}
 
 	template<typename T>
-	void kernel_214(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_214(const T* a, const int stride_a, const T* b, const int /* stride_b */, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 		eve::store(eve::fma(a[0], wide_t{b}, wide_t{c}), c);
 		eve::store(eve::fma(a[stride_a], wide_t{b}, wide_t{c + stride_c}), c + stride_c);
 	}
 
 	template<typename T>
-	void kernel_218(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
+	void kernel_218(const T* a, const int stride_a, const T* b, const int /* stride_b */, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<8>>;
 		eve::store(eve::fma(a[0], wide_t{b}, wide_t{c}), c);
 		eve::store(eve::fma(a[stride_a], wide_t{b}, wide_t{c + stride_c}), c + stride_c);
@@ -130,35 +130,19 @@ namespace gemm::detail
 
 	template<typename T>
 	void kernel_244(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
-		// consider using the same code as kernel_248 with `wide_t = eve::wide<T, eve::fixed<4>>`
-		using wide_t = eve::wide<T, eve::fixed<8>>;
-		using half_t = eve::wide<T, eve::fixed<4>>;
-		const wide_t wa{half_t{a}, half_t{a + stride_a}};
-		const wide_t wb0{half_t{b}, half_t{b + stride_b}};
-		const wide_t wb1{half_t{b + 2 * stride_b}, half_t{b + 3 * stride_b}};
+		using wide_t = eve::wide<T, eve::fixed<4>>;
+		const wide_t wb0{b};
+		const wide_t wb1{b + stride_b};
+		const wide_t wb2{b + 2 * stride_b};
+		const wide_t wb3{b + 3 * stride_b};
 
-		const auto a0 = eve::shuffle(wa, eve::pattern<0, 0, 0, 0, 4, 4, 4, 4>);
-		const auto a1 = eve::shuffle(wa, eve::pattern<1, 1, 1, 1, 5, 5, 5, 5>);
-		const auto b0 = eve::shuffle(wb0, eve::pattern<0, 1, 2, 3, 0, 1, 2, 3>);
-		const auto b1 = eve::shuffle(wb0, eve::pattern<4, 5, 6, 7, 4, 5, 6, 7>);
-		const auto res0 = eve::fma(a0, b0, a1 * b1);
+		const auto c11 = eve::fma(a[0], wb0, a[1] * wb1);
+		const auto c12 = eve::fma(a[2], wb2, a[3] * wb3);
+		eve::store(wide_t{c} + c11 + c12, c);
 
-		const auto a2 = eve::shuffle(wa, eve::pattern<2, 2, 2, 2, 6, 6, 6, 6>);
-		const auto a3 = eve::shuffle(wa, eve::pattern<3, 3, 3, 3, 7, 7, 7, 7>);
-		const auto b2 = eve::shuffle(wb1, eve::pattern<0, 1, 2, 3, 0, 1, 2, 3>);
-		const auto b3 = eve::shuffle(wb1, eve::pattern<4, 5, 6, 7, 4, 5, 6, 7>);
-		const auto res1 = eve::fma(a2, b2, a3 * b3);
-
-		const auto res = res0 + res1;
-
-		c[0] += res.get(0);
-		c[1] += res.get(1);
-		c[2] += res.get(2);
-		c[3] += res.get(3);
-		c[stride_c] += res.get(4);
-		c[stride_c + 1] += res.get(5);
-		c[stride_c + 2] += res.get(6);
-		c[stride_c + 3] += res.get(7);
+		const auto c21 = eve::fma(a[stride_a], wb0, a[stride_a + 1] * wb1);
+		const auto c22 = eve::fma(a[stride_a + 2], wb2, a[stride_a + 3] * wb3);
+		eve::store(wide_t{c + stride_c} + c21 + c22, c + stride_c);
 	}
 
 	template<typename T>
