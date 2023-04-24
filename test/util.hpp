@@ -1,6 +1,7 @@
 #ifndef GEMM_TEST_UTIL_HPP
 #define GEMM_TEST_UTIL_HPP
 
+#include <catch2/catch_config.hpp>
 #include <catch2/catch_get_random_seed.hpp>
 #include <nanobench.h>
 
@@ -15,8 +16,8 @@ namespace util
 	template<typename T>
 	constexpr T precision = 1e-1; // TODO: fix precision issues
 
-	// Output stream for the benchmarks
-	inline std::ostream* benchmark_output = &std::cout;
+	// Current Catch2 session config data
+	inline Catch::ConfigData config_data;
 
 	// Benchmark runner
 	inline auto bench = ankerl::nanobench::Bench().warmup(10).minEpochTime(std::chrono::milliseconds{20}).relative(true);
