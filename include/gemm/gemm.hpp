@@ -20,13 +20,31 @@ namespace gemm
 
 	namespace detail
 	{
+		/**
+		 * @brief Gives the size of a B1 tile for a type T
+		 * @return a size B1 such that 3 blocs of B1xB1 elements of type
+		 *         T can fit in 64 KiB
+		 */
+		template<typename T>
+		constexpr int get_B1_size() {
+			if constexpr (sizeof(T) == 1) {
+				return 128;
+			} else if constexpr (sizeof(T) == 2) {
+				return 64;
+			} else if constexpr (sizeof(T) == 4) {
+				return 64;
+			} else {
+				return 32;
+			}
+		}
+
 		// Size of a tile
 		template<typename T>
 		constexpr int TILE_SIZE = eve::wide<T>::size();
 
 		// Size of a small (L1) block
 		template<typename T>
-		constexpr int B1 = 8 * TILE_SIZE<T>;
+		constexpr int B1 = get_B1_size<T>();
 
 		// Size of a big (L2) block
 		template<typename T>

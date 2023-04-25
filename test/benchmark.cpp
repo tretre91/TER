@@ -127,7 +127,7 @@ TEST_CASE(">= 1024", "[.benchmark][very large]") {
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
 
-	const auto dim = GENERATE(1024, 2000, 4096, 8000, 8192);
+	const auto dim = GENERATE(1024, 2000, 4096, 8000);
 
 	CAPTURE(dim);
 	DYNAMIC_SECTION("" << dim << "x" << dim << " * " << dim << "x" << dim) {

@@ -7,6 +7,7 @@
 
 #include "kernels_1xx.hpp"
 #include "kernels_2xx.hpp"
+#include "kernels_4xx.hpp"
 
 namespace gemm::detail
 {
@@ -17,7 +18,7 @@ namespace gemm::detail
 	constexpr kernel<T> get_kernel(const int M, const int N, const int K);
 
 	constexpr bool is_handwritten_M(int M) {
-		return M == 1 || M == 2;
+		return M == 1 || M == 2 || M == 4;
 	}
 
 	constexpr bool is_handwritten_N(int N) {
@@ -126,23 +127,23 @@ namespace gemm::detail
 		kernels[kernel_index(2, 2, 8)] = &kernel_282;
 		kernels[kernel_index(2, 4, 8)] = &kernel_284;
 		kernels[kernel_index(2, 8, 8)] = &kernel_288;
+		kernels[kernel_index(4, 1, 1)] = &kernel_411;
+		kernels[kernel_index(4, 2, 1)] = &kernel_412;
+		kernels[kernel_index(4, 4, 1)] = &kernel_414;
+		kernels[kernel_index(4, 8, 1)] = &kernel_418;
+		kernels[kernel_index(4, 1, 2)] = &kernel_421;
+		kernels[kernel_index(4, 2, 2)] = &kernel_422;
+		kernels[kernel_index(4, 4, 2)] = &kernel_424;
+		kernels[kernel_index(4, 8, 2)] = &kernel_428;
+		kernels[kernel_index(4, 1, 4)] = &kernel_441;
+		kernels[kernel_index(4, 2, 4)] = &kernel_442;
+		kernels[kernel_index(4, 4, 4)] = &kernel_444;
+		kernels[kernel_index(4, 8, 4)] = &kernel_448;
+		kernels[kernel_index(4, 1, 8)] = &kernel_481;
+		kernels[kernel_index(4, 2, 8)] = &kernel_482;
+		kernels[kernel_index(4, 4, 8)] = &kernel_484;
+		kernels[kernel_index(4, 8, 8)] = &kernel_488;
 		/*
-		kernels[kernel_index(4,1,1)] = &kernel_411;
-		kernels[kernel_index(4,2,1)] = &kernel_412;
-		kernels[kernel_index(4,4,1)] = &kernel_414;
-		kernels[kernel_index(4,8,1)] = &kernel_418;
-		kernels[kernel_index(4,1,2)] = &kernel_421;
-		kernels[kernel_index(4,2,2)] = &kernel_422;
-		kernels[kernel_index(4,4,2)] = &kernel_424;
-		kernels[kernel_index(4,8,2)] = &kernel_428;
-		kernels[kernel_index(4,1,4)] = &kernel_441;
-		kernels[kernel_index(4,2,4)] = &kernel_442;
-		kernels[kernel_index(4,4,4)] = &kernel_444;
-		kernels[kernel_index(4,8,4)] = &kernel_448;
-		kernels[kernel_index(4,1,8)] = &kernel_481;
-		kernels[kernel_index(4,2,8)] = &kernel_482;
-		kernels[kernel_index(4,4,8)] = &kernel_484;
-		kernels[kernel_index(4,8,8)] = &kernel_488;
 		kernels[kernel_index(8,1,1)] = &kernel_811;
 		kernels[kernel_index(8,2,1)] = &kernel_812;
 		kernels[kernel_index(8,4,1)] = &kernel_814;
