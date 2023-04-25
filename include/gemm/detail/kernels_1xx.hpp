@@ -6,7 +6,7 @@
 namespace gemm::detail
 {
 	///////////////////////////////////////
-	//            1x1 kernels            //
+	//         1x1 * 1xX kernels         //
 	///////////////////////////////////////
 
 	template<typename T>
@@ -33,7 +33,7 @@ namespace gemm::detail
 	}
 
 	///////////////////////////////////////
-	//            1x2 kernels            //
+	//         1x2 * 2xX kernels         //
 	///////////////////////////////////////
 
 	template<typename T>
@@ -64,7 +64,7 @@ namespace gemm::detail
 	}
 
 	///////////////////////////////////////
-	//            1x4 kernels            //
+	//         1x4 * 4xX kernels         //
 	///////////////////////////////////////
 
 	template<typename T>
@@ -100,7 +100,7 @@ namespace gemm::detail
 	}
 
 	///////////////////////////////////////
-	//            1x8 kernels            //
+	//         1x8 * 8xX kernels         //
 	///////////////////////////////////////
 
 	template<typename T>

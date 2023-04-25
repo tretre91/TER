@@ -6,7 +6,7 @@
 namespace gemm::detail
 {
 	///////////////////////////////////////
-	//            2x1 kernels            //
+	//         2x1 * 1xX kernels         //
 	///////////////////////////////////////
 
 	template<typename T>
@@ -38,7 +38,7 @@ namespace gemm::detail
 	}
 
 	///////////////////////////////////////
-	//            2x2 kernels            //
+	//         2x2 * 2xX kernels         //
 	///////////////////////////////////////
 
 	template<typename T>
@@ -100,7 +100,7 @@ namespace gemm::detail
 	}
 
 	///////////////////////////////////////
-	//            2x4 kernels            //
+	//         2x4 * 4xX kernels         //
 	///////////////////////////////////////
 
 	template<typename T>
@@ -163,9 +163,8 @@ namespace gemm::detail
 	}
 
 	///////////////////////////////////////
-	//            2x8 kernels            //
+	//         2x8 * 8xX kernels         //
 	///////////////////////////////////////
-
 
 	template<typename T>
 	void kernel_281(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {

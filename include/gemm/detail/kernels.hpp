@@ -85,6 +85,9 @@ namespace gemm::detail
 		return 100 * M + 10 * N + K;
 	}
 
+	/**
+	 * @brief Fills an array with pointers to the kernels for M,N,K <= 8
+	 */
 	template<typename T>
 	consteval std::array<kernel<T>, 889> generate_kernel_table() {
 		std::array<kernel<T>, 889> kernels;
@@ -159,7 +162,7 @@ namespace gemm::detail
 		*/
 
 		// add the composed kernels
-		const auto dimensions = std::integer_sequence<int, 1, 2, 3, 4, 5, 6, 7, 8>{};
+		constexpr auto dimensions = std::integer_sequence<int, 1, 2, 3, 4, 5, 6, 7, 8>{};
 
 		auto set_kernel = [&]<int M, int N, int K>() {
 			if (!is_handwritten_kernel(M, N, K)) {
@@ -167,19 +170,19 @@ namespace gemm::detail
 			}
 		};
 
-		auto third_loop = [&]<int M, int N, int... Ks>(std::integer_sequence<int, Ks...>) {
+		auto K_loop = [&]<int M, int N, int... Ks>(std::integer_sequence<int, Ks...>) {
 			(set_kernel.template operator()<M, N, Ks>(), ...);
 		};
 
-		auto second_loop = [&]<int M, int... Ns>(std::integer_sequence<int, Ns...>) {
-			(third_loop.template operator()<M, Ns>(dimensions), ...);
+		auto N_loop = [&]<int M, int... Ns>(std::integer_sequence<int, Ns...>) {
+			(K_loop.template operator()<M, Ns>(dimensions), ...);
 		};
 
-		auto first_loop = [&]<int... Ms>(std::integer_sequence<int, Ms...>) {
-			(second_loop.template operator()<Ms>(dimensions), ...);
+		auto M_loop = [&]<int... Ms>(std::integer_sequence<int, Ms...>) {
+			(N_loop.template operator()<Ms>(dimensions), ...);
 		};
 
-		first_loop(dimensions);
+		M_loop(dimensions);
 
 		return kernels;
 	}
