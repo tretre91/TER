@@ -11,14 +11,9 @@ namespace gemm::detail
 
 	template<typename T>
 	void kernel_411(const T* a, const int stride_a, const T* b, const int /* stride_b */, T* c, const int stride_c) {
-		// TODO
-		// c[0] += a[0] * *b;
-		// c[stride_c] += a[stride_a] * *b;
-		// c[2*stride_c] += a[2*stride_a] * *b;
-		// c[3*stride_c] += a[3*stride_a] * *b;
 		using wide_t = eve::wide<T, eve::fixed<4>>;
 		const wide_t wb{*b};
-		const wide_t wa{a[0], a[stride_a], a[2 * stride_a], a[3 * stride_a]};
+		const wide_t wa{[=](auto i, auto) { return a[i * stride_a]; }};
 		const auto wc = wb * wa;
 		c[0] += wc.get(0);
 		c[stride_c] += wc.get(1);
@@ -28,15 +23,19 @@ namespace gemm::detail
 
 	template<typename T>
 	void kernel_412(const T* a, const int stride_a, const T* b, const int /* stride_b */, T* c, const int stride_c) {
-		// TODO
-		c[0] += a[0] * b[0];
-		c[1] += a[0] * b[1];
-		c[stride_c] += a[stride_a] * b[0];
-		c[stride_c + 1] += a[stride_a] * b[1];
-		c[2 * stride_c] += a[2 * stride_a] * b[0];
-		c[2 * stride_c + 1] += a[2 * stride_a] * b[1];
-		c[3 * stride_c] += a[3 * stride_a] * b[0];
-		c[3 * stride_c + 1] += a[3 * stride_a] * b[1];
+		using wide_t = eve::wide<T, eve::fixed<4>>;
+		const wide_t wa{[=](auto i, auto) { return a[i * stride_a]; }};
+		auto wc = wa * b[0];
+		c[0] += wc.get(0);
+		c[stride_c] += wc.get(1);
+		c[2 * stride_c] += wc.get(2);
+		c[3 * stride_c] += wc.get(3);
+
+		wc = wa * b[1];
+		c[1] += wc.get(0);
+		c[stride_c + 1] += wc.get(1);
+		c[2 * stride_c + 1] += wc.get(2);
+		c[3 * stride_c + 1] += wc.get(3);
 	}
 
 	template<typename T>
@@ -65,11 +64,14 @@ namespace gemm::detail
 
 	template<typename T>
 	void kernel_421(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
-		// TODO: already faster like this, try a vectorized version ?
-		c[0] += a[0] * b[0] + a[1] * b[stride_b];
-		c[stride_c] += a[stride_a] * b[0] + a[stride_a + 1] * b[stride_b];
-		c[2 * stride_c] += a[2 * stride_a] * b[0] + a[2 * stride_a + 1] * b[stride_b];
-		c[3 * stride_c] += a[3 * stride_a] * b[0] + a[3 * stride_a + 1] * b[stride_b];
+		using wide_t = eve::wide<T, eve::fixed<4>>;
+		const wide_t wa0{[=](auto i, auto) { return a[i * stride_a]; }};
+		const wide_t wa1{[=](auto i, auto) { return a[i * stride_a + 1]; }};
+		const auto wc = eve::fma(wa0, b[0], wa1 * b[stride_b]);
+		c[0] += wc.get(0);
+		c[stride_c] += wc.get(1);
+		c[2 * stride_c] += wc.get(2);
+		c[3 * stride_c] += wc.get(3);
 	}
 
 	template<typename T>
