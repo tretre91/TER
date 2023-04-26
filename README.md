@@ -31,7 +31,7 @@ optimization).
 	- [x] 1x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 	- [x] 2x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 	- [x] 4x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
-	- [ ] 8x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
+	- [x] 8x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 - Tests
 	- [x] Kernels
 	- [x] Big matrices

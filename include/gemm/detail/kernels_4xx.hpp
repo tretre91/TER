@@ -127,7 +127,7 @@ namespace gemm::detail
 	template<typename T>
 	void kernel_441(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
-		const wide_t wb{b[0], b[stride_b], b[2 * stride_b], b[3 * stride_b]};
+		const wide_t wb{[=](auto i, auto) { return b[i*stride_b]; }};
 
 		c[0] += eve::reduce(wide_t{a} * wb);
 		c[stride_c] += eve::reduce(wide_t{a + stride_a} * wb);
@@ -138,8 +138,8 @@ namespace gemm::detail
 	template<typename T>
 	void kernel_442(const T* a, const int stride_a, const T* b, const int stride_b, T* c, const int stride_c) {
 		using wide_t = eve::wide<T, eve::fixed<4>>;
-		const wide_t wb0{b[0], b[stride_b], b[2 * stride_b], b[3 * stride_b]};
-		const wide_t wb1{b[1], b[stride_b + 1], b[2 * stride_b + 1], b[3 * stride_b + 1]};
+		const wide_t wb0{[=](auto i, auto) { return b[i*stride_b]; }};
+		const wide_t wb1{[=](auto i, auto) { return b[i*stride_b+1]; }};
 
 		c[0] += eve::reduce(wide_t{a} * wb0);
 		c[1] += eve::reduce(wide_t{a} * wb1);

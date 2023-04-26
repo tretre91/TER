@@ -8,6 +8,7 @@
 #include "kernels_1xx.hpp"
 #include "kernels_2xx.hpp"
 #include "kernels_4xx.hpp"
+#include "kernels_8xx.hpp"
 
 namespace gemm::detail
 {
@@ -18,7 +19,7 @@ namespace gemm::detail
 	constexpr kernel<T> get_kernel(const int M, const int N, const int K);
 
 	constexpr bool is_handwritten_M(int M) {
-		return M == 1 || M == 2 || M == 4;
+		return M == 1 || M == 2 || M == 4 || M == 8;
 	}
 
 	constexpr bool is_handwritten_N(int N) {
@@ -143,24 +144,22 @@ namespace gemm::detail
 		kernels[kernel_index(4, 2, 8)] = &kernel_482;
 		kernels[kernel_index(4, 4, 8)] = &kernel_484;
 		kernels[kernel_index(4, 8, 8)] = &kernel_488;
-		/*
-		kernels[kernel_index(8,1,1)] = &kernel_811;
-		kernels[kernel_index(8,2,1)] = &kernel_812;
-		kernels[kernel_index(8,4,1)] = &kernel_814;
-		kernels[kernel_index(8,8,1)] = &kernel_818;
-		kernels[kernel_index(8,1,2)] = &kernel_821;
-		kernels[kernel_index(8,2,2)] = &kernel_822;
-		kernels[kernel_index(8,4,2)] = &kernel_824;
-		kernels[kernel_index(8,8,2)] = &kernel_828;
-		kernels[kernel_index(8,1,4)] = &kernel_841;
-		kernels[kernel_index(8,2,4)] = &kernel_842;
-		kernels[kernel_index(8,4,4)] = &kernel_844;
-		kernels[kernel_index(8,8,4)] = &kernel_848;
-		kernels[kernel_index(8,1,8)] = &kernel_881;
-		kernels[kernel_index(8,2,8)] = &kernel_882;
-		kernels[kernel_index(8,4,8)] = &kernel_884;
-		kernels[kernel_index(8,8,8)] = &kernel_888;
-		*/
+		kernels[kernel_index(8, 1, 1)] = &kernel_811;
+		kernels[kernel_index(8, 2, 1)] = &kernel_812;
+		kernels[kernel_index(8, 4, 1)] = &kernel_814;
+		kernels[kernel_index(8, 8, 1)] = &kernel_818;
+		kernels[kernel_index(8, 1, 2)] = &kernel_821;
+		kernels[kernel_index(8, 2, 2)] = &kernel_822;
+		kernels[kernel_index(8, 4, 2)] = &kernel_824;
+		kernels[kernel_index(8, 8, 2)] = &kernel_828;
+		kernels[kernel_index(8, 1, 4)] = &kernel_841;
+		kernels[kernel_index(8, 2, 4)] = &kernel_842;
+		kernels[kernel_index(8, 4, 4)] = &kernel_844;
+		kernels[kernel_index(8, 8, 4)] = &kernel_848;
+		kernels[kernel_index(8, 1, 8)] = &kernel_881;
+		kernels[kernel_index(8, 2, 8)] = &kernel_882;
+		kernels[kernel_index(8, 4, 8)] = &kernel_884;
+		kernels[kernel_index(8, 8, 8)] = &kernel_888;
 
 		// add the composed kernels
 		constexpr auto dimensions = std::integer_sequence<int, 1, 2, 3, 4, 5, 6, 7, 8>{};

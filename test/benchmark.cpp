@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 
 TEST_CASE("M,N,K <= 8", "[.benchmark][small]") {
 	using util::bench;
-	bench.minEpochTime(10ms);
+	bench.minEpochTime(20ms);
 
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
