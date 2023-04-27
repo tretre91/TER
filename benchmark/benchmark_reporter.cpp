@@ -15,72 +15,72 @@
 class BenchmarkReporter : public Catch::StreamingReporterBase
 {
 private:
-	using Catch::StreamingReporterBase::StreamingReporterBase;
+    using Catch::StreamingReporterBase::StreamingReporterBase;
 
-	Catch::Verbosity m_verbosityLevel;
-	std::string m_currentTestCase = "";
+    Catch::Verbosity m_verbosityLevel;
+    std::string m_currentTestCase = "";
 
 public:
-	static std::string getDescription() { return "Reporter indicating which benchmark is currently being run"; }
+    static std::string getDescription() { return "Reporter indicating which benchmark is currently being run"; }
 
-	void testRunStarting(const Catch::TestRunInfo& info) override {
-		Catch::StreamingReporterBase::testRunStarting(info);
+    void testRunStarting(const Catch::TestRunInfo& info) override {
+        Catch::StreamingReporterBase::testRunStarting(info);
 
-		const auto& config = util::config_data;
-		m_verbosityLevel = config.verbosity;
+        const auto& config = util::config_data;
+        m_verbosityLevel = config.verbosity;
 
-		util::bench.output(&util::bench_output);
+        util::bench.output(&util::bench_output);
 
-		fmt::print(m_stream, "RNG Seed initialized to {}\n", config.rngSeed);
-		if (!config.testsOrTags.empty()) {
-			fmt::print(m_stream, "Active filters: {}\n\n", fmt::join(config.testsOrTags, "; "));
-		} else {
-			fmt::print(m_stream, "No filters\n\n");
-		}
-	}
+        fmt::print(m_stream, "RNG Seed initialized to {}\n", config.rngSeed);
+        if (!config.testsOrTags.empty()) {
+            fmt::print(m_stream, "Active filters: {}\n\n", fmt::join(config.testsOrTags, "; "));
+        } else {
+            fmt::print(m_stream, "No filters\n\n");
+        }
+    }
 
-	void testCaseStarting(const Catch::TestCaseInfo& info) override {
-		Catch::StreamingReporterBase::testCaseStarting(info);
+    void testCaseStarting(const Catch::TestCaseInfo& info) override {
+        Catch::StreamingReporterBase::testCaseStarting(info);
 
-		const auto title = fmt::format("\n## Benchmark \"{}\"", info.name);
-		fmt::print(m_stream, "{}\n", title);
-		if (m_verbosityLevel == Catch::Verbosity::High) {
-			fmt::print("{}\n", title);
-		}
-		m_currentTestCase = info.name;
-	}
+        const auto title = fmt::format("\n## Benchmark \"{}\"", info.name);
+        fmt::print(m_stream, "{}\n", title);
+        if (m_verbosityLevel == Catch::Verbosity::High) {
+            fmt::print("{}\n", title);
+        }
+        m_currentTestCase = info.name;
+    }
 
-	void sectionStarting(const Catch::SectionInfo& info) override {
-		Catch::StreamingReporterBase::sectionStarting(info);
+    void sectionStarting(const Catch::SectionInfo& info) override {
+        Catch::StreamingReporterBase::sectionStarting(info);
 
-		if (info.name == m_currentTestCase) {
-			return;
-		}
+        if (info.name == m_currentTestCase) {
+            return;
+        }
 
-		util::bench_output.str("");
+        util::bench_output.str("");
 
-		const auto title = fmt::format("\n### {}", info.name);
-		fmt::print(m_stream, "{}\n", title);
-		if (m_verbosityLevel == Catch::Verbosity::High) {
-			fmt::print("{}\n", title);
-		}
-	}
+        const auto title = fmt::format("\n### {}", info.name);
+        fmt::print(m_stream, "{}\n", title);
+        if (m_verbosityLevel == Catch::Verbosity::High) {
+            fmt::print("{}\n", title);
+        }
+    }
 
-	void sectionEnded(const Catch::SectionStats& stats) override {
-		if (stats.sectionInfo.name == m_currentTestCase) {
-			return;
-		}
+    void sectionEnded(const Catch::SectionStats& stats) override {
+        if (stats.sectionInfo.name == m_currentTestCase) {
+            return;
+        }
 
-		fmt::print(m_stream, "{}", util::bench_output.str());
-	}
+        fmt::print(m_stream, "{}", util::bench_output.str());
+    }
 
-	void testCasePartialStarting(const Catch::TestCaseInfo& info, std::uint64_t partNumber) override {
-		Catch::StreamingReporterBase::testCasePartialStarting(info, partNumber);
+    void testCasePartialStarting(const Catch::TestCaseInfo& info, std::uint64_t partNumber) override {
+        Catch::StreamingReporterBase::testCasePartialStarting(info, partNumber);
 
-		if (m_verbosityLevel == Catch::Verbosity::High) {
-			fmt::print("- {}#{} ...\n", info.name, partNumber);
-		}
-	}
+        if (m_verbosityLevel == Catch::Verbosity::High) {
+            fmt::print("- {}#{} ...\n", info.name, partNumber);
+        }
+    }
 };
 
 CATCH_REGISTER_REPORTER("benchmark", BenchmarkReporter);

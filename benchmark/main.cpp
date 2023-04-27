@@ -3,14 +3,14 @@
 #include "util.hpp"
 
 int main(int argc, char* argv[]) {
-	Catch::Session session;
+    Catch::Session session;
 
-	int return_code = session.applyCommandLine(argc, argv);
-	if (return_code != 0) {
-		return return_code;
-	}
+    int return_code = session.applyCommandLine(argc, argv);
+    if (return_code != 0) {
+        return return_code;
+    }
 
-	util::config_data = session.configData();
+    util::config_data = session.configData();
 
-	return session.run();
+    return session.run();
 }
