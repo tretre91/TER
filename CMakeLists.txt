@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.14)
 
 project(gemm)
 
-option(GEMM_BUILD_TEST "Build the test/benchmark executable" OFF)
+option(GEMM_BUILD_TEST "Build the test executable" OFF)
 option(GEMM_USE_CTEST "Use CTest" OFF)
+option(GEMM_BUILD_BENCHMARK "Build the benchmark executable" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
@@ -24,7 +25,10 @@ target_link_libraries(gemm INTERFACE eve::eve)
 target_compile_features(gemm INTERFACE cxx_std_20)
 add_library(gemm::gemm ALIAS gemm)
 
-if (GEMM_BUILD_TEST)
+if(GEMM_BUILD_TEST)
   add_subdirectory(test)
 endif()
 
+if(GEMM_BUILD_BENCHMARK)
+  add_subdirectory(benchmark)
+endif()

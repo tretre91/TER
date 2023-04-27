@@ -1,3 +1,4 @@
+#include "catch2/interfaces/catch_interfaces_reporter.hpp"
 #include <catch2/catch_config.hpp>
 #include <catch2/catch_test_case_info.hpp>
 #include <catch2/reporters/catch_reporter_registrars.hpp>
@@ -28,13 +29,13 @@ public:
 		const auto& config = util::config_data;
 		m_verbosityLevel = config.verbosity;
 
-		util::bench.output(&m_stream);
+		util::bench.output(&util::bench_output);
 
-		fmt::print("RNG Seed initialized to {}\n", config.rngSeed);
+		fmt::print(m_stream, "RNG Seed initialized to {}\n", config.rngSeed);
 		if (!config.testsOrTags.empty()) {
-			fmt::print("Active filters: {}\n\n", fmt::join(config.testsOrTags, "; "));
+			fmt::print(m_stream, "Active filters: {}\n\n", fmt::join(config.testsOrTags, "; "));
 		} else {
-			fmt::print("No filters\n\n");
+			fmt::print(m_stream, "No filters\n\n");
 		}
 	}
 
@@ -56,11 +57,21 @@ public:
 			return;
 		}
 
+		util::bench_output.str("");
+
 		const auto title = fmt::format("\n### {}", info.name);
 		fmt::print(m_stream, "{}\n", title);
 		if (m_verbosityLevel == Catch::Verbosity::High) {
 			fmt::print("{}\n", title);
 		}
+	}
+
+	void sectionEnded(const Catch::SectionStats& stats) override {
+		if (stats.sectionInfo.name == m_currentTestCase) {
+			return;
+		}
+
+		fmt::print(m_stream, "{}", util::bench_output.str());
 	}
 
 	void testCasePartialStarting(const Catch::TestCaseInfo& info, std::uint64_t partNumber) override {

@@ -1,44 +1,60 @@
 # gemm
 
-A C++ implementation of blas matrix-matrix multiplication routines (xgemm).
+A C++ implementation of blas general matrix-matrix multiplication routines (xgemm).
 
 ## Build
 
 The library is header only, you just have to copy the files located in the
 `include` folder to use it.
 
-In order to build the tests/benchmarks, you will have to use
-[CMake](https://cmake.org/) or [xmake](https://xmake.io), and have openblas
-installed on your system.
+In order to build the tests/benchmarks, you will need openblas installed on
+your system.
+
+The tests and benchmarks can then be built and ran with [CMake](https://cmake.org/):
+
+```bash
+$ cmake -S . -B build -DGEMM_BUILD_TEST=ON -DGEMM_BUILD_BENCHMARK=ON # -DGEMM_USE_CTEST=ON
+$ cmake --build build --target test --target benchmark
+$ ./build/test/test
+$ ./build/benchmark/benchmark --reporter=benchmark
+```
+
+or with [xmake](https://xmake.io):
+
+```bash
+$ xmake
+$ xmake build
+$ xmake run test
+$ xmake run benchmark --reporter=benchmark
+```
 
 ## Benchmark
 
-Some benchmark results are available [here](./misc/benchmark.md), they were ran
-on a AMD Ryzen 5 2600 cpu, locked at 3400MHz. The program was compiled with
-`g++` and the `-O3 -march=native` options.
+Some benchmark results are available [here](./benchmark/results.md), they were
+ran on a AMD Ryzen 5 3500u cpu, locked at 2100MHz. The program was compiled
+with `GCC 12.2.1` and the `-O3 -march=native` options.
 
-The floating point version `gemm<float>` was run against openblas' `sgemm` and,
-for small enough matrices, a naive algorithm (with the loop swapping
-optimization).
+In the benchmarks, the floating point version `gemm<float>` is run against
+openblas' `sgemm` and, for small enough matrices, a naive algorithm (with the
+loop swapping optimization).
 
 ## TODO
 
-- Integrate the kernels to the main matrix multiplication function
+- [x] Integrate the kernels to the main matrix multiplication function
 	- [x] Have a working implementation
-	- [ ] Fix performance issues
-- Microkernels
+	- [x] Fix performance issues
+- [x] Microkernels
 	- [x] Kernel composition function
 	- [x] 1x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 	- [x] 2x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 	- [x] 4x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
 	- [x] 8x(1, 2, 4, 8)x(1, 2, 4, 8) kernels
-- Tests
+- [ ] Tests
 	- [x] Kernels
 	- [x] Big matrices
 	- [ ] Fix precision issues
-	- [x] Write a custom Catch2 reporter
 	- [x] Double
-- Benchmarks
+- [ ] Benchmarks
 	- [x] Small matrices
 	- [x] Big matrices
 	- [ ] Double

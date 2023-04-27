@@ -10,7 +10,7 @@
 
 using namespace std::chrono_literals;
 
-TEST_CASE("M,N,K <= 8", "[.benchmark][small]") {
+TEST_CASE("M,N,K <= 8", "[small]") {
 	using util::bench;
 	bench.minEpochTime(20ms);
 
@@ -46,7 +46,7 @@ TEST_CASE("M,N,K <= 8", "[.benchmark][small]") {
 	}
 }
 
-TEST_CASE("Square 1 <= dim <= 512", "[.benchmark][square][small]") {
+TEST_CASE("Square 1 <= dim <= 512", "[square][small]") {
 	using util::bench;
 
 	bench.warmup(0);
@@ -80,11 +80,11 @@ TEST_CASE("Square 1 <= dim <= 512", "[.benchmark][square][small]") {
 	}
 }
 
-TEST_CASE("Non square", "[.benchmark][large]") {
+TEST_CASE("Non square", "[large]") {
 	using util::bench;
 
 	bench.warmup(0);
-	bench.minEpochTime(20ms);
+	bench.minEpochTime(30ms);
 
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
@@ -119,7 +119,7 @@ TEST_CASE("Non square", "[.benchmark][large]") {
 	}
 }
 
-TEST_CASE("Worst dimension", "[.benchmark][square][large]") {
+TEST_CASE("Worst dimension", "[square][large]") {
 	using util::bench;
 
 	bench.warmup(0);
@@ -130,25 +130,26 @@ TEST_CASE("Worst dimension", "[.benchmark][square][large]") {
 	const int dim = gemm::detail::B2<float> + gemm::detail::B1<float> + gemm::detail::TILE_SIZE<float> + 1;
 
 	CAPTURE(dim);
+	DYNAMIC_SECTION("" << dim << "x" << dim << " * " << dim << "x" << dim) {
+		const auto A = util::random_vector<float>(dim * dim);
+		const auto B = util::random_vector<float>(dim * dim);
+		auto C = util::random_vector<float>(dim * dim);
+		auto oldC = C;
 
-	const auto A = util::random_vector<float>(dim * dim);
-	const auto B = util::random_vector<float>(dim * dim);
-	auto C = util::random_vector<float>(dim * dim);
-	auto oldC = C;
+		const auto* ptr_A = A.data();
+		const auto* ptr_B = B.data();
+		auto* ptr_C = C.data();
 
-	const auto* ptr_A = A.data();
-	const auto* ptr_B = B.data();
-	auto* ptr_C = C.data();
+		bench.title(fmt::format("{0}x{0}", dim));
 
-	bench.title(fmt::format("{0}x{0}", dim));
+		bench.run("gemm", [=] { gemm::sgemm(util::no_trans, util::no_trans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
+		std::copy(oldC.begin(), oldC.end(), C.begin());
 
-	bench.run("gemm", [=] { gemm::sgemm(util::no_trans, util::no_trans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
-	std::copy(oldC.begin(), oldC.end(), C.begin());
-
-	bench.run("blas", [=] { cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
+		bench.run("blas", [=] { cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
+	}
 }
 
-TEST_CASE(">= 1024", "[.benchmark][square][very large]") {
+TEST_CASE(">= 1024", "[square][very large]") {
 	using util::bench;
 
 	bench.warmup(0);
@@ -178,7 +179,7 @@ TEST_CASE(">= 1024", "[.benchmark][square][very large]") {
 	}
 }
 
-TEST_CASE(">= 4096", "[.benchmark][square][very large]") {
+TEST_CASE(">= 4096", "[square][very large]") {
 	using util::bench;
 
 	bench.warmup(0);

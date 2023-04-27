@@ -1,16 +1,5 @@
+set(BLA_VENDOR OpenBLAS)
 find_package(BLAS)
-
-CPMAddPackage(
-  NAME nanobench
-  GITHUB_REPOSITORY martinus/nanobench
-  VERSION 4.3.11
-)
-
-CPMAddPackage(
-  NAME fmt
-  GITHUB_REPOSITORY fmtlib/fmt
-  GIT_TAG 9.1.0
-)
 
 CPMAddPackage(
   NAME catch2
@@ -20,19 +9,16 @@ CPMAddPackage(
 )
 
 set(TEST_SOURCES
-  main.cpp
-  nanobench.cpp
   kernels.cpp
   square.cpp
   various_dimensions.cpp
   special_cases.cpp
-  benchmark.cpp
-  benchmark_reporter.cpp
 )
 
 add_executable(test ${TEST_SOURCES})
-target_link_libraries(test PRIVATE gemm::gemm nanobench::nanobench fmt::fmt BLAS::BLAS Catch2::Catch2)
+target_link_libraries(test PRIVATE gemm::gemm BLAS::BLAS Catch2::Catch2WithMain)
 target_compile_options(test PRIVATE -march=native)
+target_compile_definitions(test PRIVATE CATCH_FAST_COMPILE)
 
 if (GEMM_USE_CTEST)
   list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
