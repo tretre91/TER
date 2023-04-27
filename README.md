@@ -37,7 +37,7 @@ optimization).
 	- [x] Big matrices
 	- [ ] Fix precision issues
 	- [x] Write a custom Catch2 reporter
-	- [ ] Double
+	- [x] Double
 - Benchmarks
 	- [x] Small matrices
 	- [x] Big matrices

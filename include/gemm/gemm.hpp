@@ -718,7 +718,7 @@ namespace gemm
 			for (int line = 0; line < M; line++) {
 				auto c = std::span(C + line * ldc, N);
 				auto ab = std::span(AB + line * ldab, N);
-				eve::algo::transform_to(eve::views::zip(ab, c), c, [alpha, beta](auto x) { return alpha * eve::get<0>(x) + beta * eve::get<1>(x); });
+				eve::algo::transform_to(eve::views::zip(ab, c), c, [alpha, beta](auto x) { return eve::fma(alpha, eve::get<0>(x), beta * eve::get<1>(x)); });
 			}
 		}
 
@@ -773,7 +773,7 @@ namespace gemm
 				for (int line = 0; line < B2<T>; line++) {
 					auto c = std::span(C + (i + line) * ldc, N);
 					auto ab = std::span(AB + line * ldab, N);
-					eve::algo::transform_to(eve::views::zip(ab, c), c, [alpha, beta](auto x) { return alpha * eve::get<0>(x) + beta * eve::get<1>(x); });
+					eve::algo::transform_to(eve::views::zip(ab, c), c, [alpha, beta](auto x) { return eve::fma(alpha, eve::get<0>(x), beta * eve::get<1>(x)); });
 				}
 			}
 
@@ -783,21 +783,40 @@ namespace gemm
 				for (int line = 0; line < remaining_M; line++) {
 					auto c = std::span(C + (i_lim + line) * ldc, N);
 					auto ab = std::span(AB + line * ldab, N);
-					eve::algo::transform_to(eve::views::zip(ab, c), c, [alpha, beta](auto x) { return alpha * eve::get<0>(x) + beta * eve::get<1>(x); });
+					eve::algo::transform_to(eve::views::zip(ab, c), c, [alpha, beta](auto x) { return eve::fma(alpha, eve::get<0>(x), beta * eve::get<1>(x)); });
 				}
 			}
 		}
 	} // namespace detail
 
 	/**
-	 * @brief Entry point for the matrix multiplication
-	 * This function chooses the appropriate function to call depending on the matrices' dimensions
+	 * @brief Performs the operation `C = alpha * AB  + beta * C`.
+	 *
+	 * @note This function only chooses the appropriate function to call depending on the matrices' dimensions:
 	 * - If the matrices are small enough, we call `gemm_small` which directly calls the appropriate
-	 *   microkernel. Doing this allows to avoid the overhead of the multiple function calls in the
+	 *   microkernel. Doing so allows to avoid the overhead of the multiple function calls in the
 	 *   two other versions.
 	 * - If the matrices are too big, we call `gemm_large`, which uses less extra memory than `gemm_medium`
 	 *   (B2 * N * sizeof(T) bytes instead of M * N * sizeof(T) bytes).
 	 * - For the other cases, we call `gemm_medium`.
+	 *
+	 * @param M the number of rows of `A` and `C`
+	 * @param N the number of columns of `B` and `C`
+	 * @param K the number of columns of `A` / rows of `B`
+	 * @param alpha The multiplier of `AB`
+	 * @param A An array of size `M * lda`
+	 * @param lda The "true" first dimension of `A`, that is the number of elements between two rows of `A`
+	 *            as declared in the calling program. Note that `lda` >= `K` should hold true, otherwise the
+	 *            behaviour is undefined.
+	 * @param B An array of size `K * ldb`
+	 * @param ldb The "true" first dimension of `B`, that is the number of elements between two rows of `B`
+	 *            as declared in the calling program. Note that `ldb` >= `N` should hold true, otherwise the
+	 *            behaviour is undefined.
+	 * @param beta The multiplier of `C`
+	 * @param C An array of size `M * ldc`
+	 * @param ldc The "true" first dimension of `C`, that is the number of elements between two rows of `C`
+	 *            as declared in the calling program. Note that `ldc` >= `N` should hold true, otherwise the
+	 *            behaviour is undefined.
 	 */
 	template<typename T>
 	void gemm(transposition, transposition, const int M, const int N, const int K, const T alpha, const T* A, const int lda, const T* B, const int ldb,

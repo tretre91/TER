@@ -46,16 +46,16 @@ TEST_CASE("M,N,K <= 8", "[.benchmark][small]") {
 	}
 }
 
-TEST_CASE("1 <= dim <= 32", "[.benchmark][small]") {
+TEST_CASE("Square 1 <= dim <= 512", "[.benchmark][square][small]") {
 	using util::bench;
 
 	bench.warmup(0);
-	bench.minEpochTime(10ms);
+	bench.minEpochTime(30ms);
 
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
 
-	const auto dim = GENERATE(1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 16, 21, 32);
+	const auto dim = GENERATE(1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 16, 21, 32, 64, 128, 256, 512);
 
 	CAPTURE(dim);
 	DYNAMIC_SECTION("" << dim << "x" << dim << " * " << dim << "x" << dim) {
@@ -80,22 +80,22 @@ TEST_CASE("1 <= dim <= 32", "[.benchmark][small]") {
 	}
 }
 
-TEST_CASE("M,N,K >= 64", "[.benchmark][large]") {
+TEST_CASE("Non square", "[.benchmark][large]") {
 	using util::bench;
 
 	bench.warmup(0);
-	bench.minEpochTime(10ms);
+	bench.minEpochTime(20ms);
 
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
 
 
-	const auto M = GENERATE(64, 128, 256, 512);
-	const auto K = GENERATE(64, 128, 256, 512);
+	const auto M = GENERATE(64, 128, 512);
+	const auto K = GENERATE(128, 256);
 
 	const auto A = util::random_vector<float>(M * K);
 
-	const auto N = GENERATE(64, 128, 256, 512);
+	const auto N = GENERATE(64, 512);
 
 	CAPTURE(M, N, K);
 	DYNAMIC_SECTION("" << M << "x" << K << " * " << K << "x" << N) {
@@ -119,7 +119,7 @@ TEST_CASE("M,N,K >= 64", "[.benchmark][large]") {
 	}
 }
 
-TEST_CASE("Worst dimension", "[.benchmark][large]") {
+TEST_CASE("Worst dimension", "[.benchmark][square][large]") {
 	using util::bench;
 
 	bench.warmup(0);
@@ -148,7 +148,7 @@ TEST_CASE("Worst dimension", "[.benchmark][large]") {
 	bench.run("blas", [=] { cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
 }
 
-TEST_CASE(">= 1024", "[.benchmark][very large]") {
+TEST_CASE(">= 1024", "[.benchmark][square][very large]") {
 	using util::bench;
 
 	bench.warmup(0);
@@ -156,7 +156,37 @@ TEST_CASE(">= 1024", "[.benchmark][very large]") {
 	const float alpha = util::random_float<float>();
 	const float beta = util::random_float<float>();
 
-	const auto dim = GENERATE(1024, 2000, 4096, 8000);
+	const auto dim = GENERATE(1024, 1327, 2000);
+
+	CAPTURE(dim);
+	DYNAMIC_SECTION("" << dim << "x" << dim << " * " << dim << "x" << dim) {
+		const auto A = util::random_vector<float>(dim * dim);
+		const auto B = util::random_vector<float>(dim * dim);
+		auto C = util::random_vector<float>(dim * dim);
+		auto oldC = C;
+
+		const auto* ptr_A = A.data();
+		const auto* ptr_B = B.data();
+		auto* ptr_C = C.data();
+
+		bench.title(fmt::format("{0}x{0}", dim));
+
+		bench.run("gemm", [=] { gemm::sgemm(util::no_trans, util::no_trans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
+		std::copy(oldC.begin(), oldC.end(), C.begin());
+
+		bench.run("blas", [=] { cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
+	}
+}
+
+TEST_CASE(">= 4096", "[.benchmark][square][very large]") {
+	using util::bench;
+
+	bench.warmup(0);
+
+	const float alpha = util::random_float<float>();
+	const float beta = util::random_float<float>();
+
+	const auto dim = GENERATE(4096, 8000);
 
 	CAPTURE(dim);
 	DYNAMIC_SECTION("" << dim << "x" << dim << " * " << dim << "x" << dim) {
