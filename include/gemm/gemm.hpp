@@ -88,7 +88,7 @@ namespace gemm
         void kernel_B1_K_B1(const int K, const T* A, const int lda, const T* B, const int ldb, T* C, const int ldc) {
             const int remaining_K = K % TILE_SIZE<T>;
             const int k_lim = K - remaining_K;
-            auto kernel = get_kernel<T>(TILE_SIZE<T>, TILE_SIZE<T>, remaining_K);
+            auto kernel_T_K_T = get_kernel<T>(TILE_SIZE<T>, TILE_SIZE<T>, remaining_K);
 
             for (int i = 0; i < B1<T>; i += TILE_SIZE<T>) {
                 const T* base_A = A + i * lda;
@@ -102,7 +102,7 @@ namespace gemm
 
                 if (remaining_K > 0) {
                     for (int j = 0; j < B1<T>; j += TILE_SIZE<T>) {
-                        kernel(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
+                        kernel_T_K_T(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
                     }
                 }
             }
@@ -141,7 +141,7 @@ namespace gemm
         void kernel_B1_B1_N(const int N, const T* A, const int lda, const T* B, const int ldb, T* C, const int ldc) {
             const int remaining_N = N % TILE_SIZE<T>;
             const int j_lim = N - remaining_N;
-            auto kernel = get_kernel<T>(TILE_SIZE<T>, remaining_N, TILE_SIZE<T>);
+            auto kernel_T_T_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, TILE_SIZE<T>);
 
             for (int i = 0; i < B1<T>; i += TILE_SIZE<T>) {
                 const T* base_A = A + i * lda;
@@ -152,7 +152,7 @@ namespace gemm
                         tile_kernel<T>(a, lda, B + k * ldb + j, ldb, base_C + j, ldc);
                     }
                     if (remaining_N > 0) {
-                        kernel(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
+                        kernel_T_T_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
                     }
                 }
             }
@@ -193,9 +193,9 @@ namespace gemm
             const int remaining_K = K % TILE_SIZE<T>;
             const int k_lim = K - remaining_K;
 
-            auto kernel_BT_K_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, remaining_K);
-            auto kernel_BT_BT_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, TILE_SIZE<T>);
-            auto kernel_BT_K_BT = get_kernel<T>(TILE_SIZE<T>, TILE_SIZE<T>, remaining_K);
+            auto kernel_T_K_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, remaining_K);
+            auto kernel_T_T_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, TILE_SIZE<T>);
+            auto kernel_T_K_T = get_kernel<T>(TILE_SIZE<T>, TILE_SIZE<T>, remaining_K);
 
             for (int i = 0; i < B1<T>; i += TILE_SIZE<T>) {
                 const T* base_A = A + i * lda;
@@ -206,17 +206,17 @@ namespace gemm
                         tile_kernel<T>(a, lda, B + k * ldb + j, ldb, base_C + j, ldc);
                     }
                     if (remaining_N > 0) {
-                        kernel_BT_BT_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
+                        kernel_T_T_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
                     }
                 }
 
                 if (remaining_K > 0) {
                     for (int j = 0; j < j_lim; j += TILE_SIZE<T>) {
-                        kernel_BT_K_BT(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
+                        kernel_T_K_T(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
                     }
 
                     if (remaining_N > 0) {
-                        kernel_BT_K_N(base_A + k_lim, lda, B + k_lim * ldb + j_lim, ldb, base_C + j_lim, ldc);
+                        kernel_T_K_N(base_A + k_lim, lda, B + k_lim * ldb + j_lim, ldb, base_C + j_lim, ldc);
                     }
                 }
             }
@@ -264,7 +264,7 @@ namespace gemm
         void kernel_M_B1_B1(const int M, const T* A, const int lda, const T* B, const int ldb, T* C, const int ldc) {
             const int remaining_M = M % TILE_SIZE<T>;
             const int i_lim = M - remaining_M;
-            auto kernel = get_kernel<T>(remaining_M, TILE_SIZE<T>, TILE_SIZE<T>);
+            auto kernel_M_T_T = get_kernel<T>(remaining_M, TILE_SIZE<T>, TILE_SIZE<T>);
 
             for (int i = 0; i < i_lim; i += TILE_SIZE<T>) {
                 const T* base_A = A + i * lda;
@@ -282,7 +282,7 @@ namespace gemm
                 T* base_C = C + i_lim * ldc;
                 for (int k = 0; k < B1<T>; k += TILE_SIZE<T>) {
                     for (int j = 0; j < B1<T>; j += TILE_SIZE<T>) {
-                        kernel(base_A + k, lda, B + k * ldb + j, ldb, base_C + j, ldb);
+                        kernel_M_T_T(base_A + k, lda, B + k * ldb + j, ldb, base_C + j, ldb);
                     }
                 }
             }
@@ -330,9 +330,9 @@ namespace gemm
             const int remaining_N = N % TILE_SIZE<T>;
             const int j_lim = N - remaining_N;
 
-            auto kernel_BT_BT_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, TILE_SIZE<T>);
-            auto kernel_M_BT_BT = get_kernel<T>(remaining_M, TILE_SIZE<T>, TILE_SIZE<T>);
-            auto kernel_M_BT_N = get_kernel<T>(remaining_M, remaining_N, TILE_SIZE<T>);
+            auto kernel_T_T_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, TILE_SIZE<T>);
+            auto kernel_M_T_T = get_kernel<T>(remaining_M, TILE_SIZE<T>, TILE_SIZE<T>);
+            auto kernel_M_T_N = get_kernel<T>(remaining_M, remaining_N, TILE_SIZE<T>);
 
             for (int i = 0; i < i_lim; i += TILE_SIZE<T>) {
                 const T* base_A = A + i * lda;
@@ -343,7 +343,7 @@ namespace gemm
                         tile_kernel<T>(a, lda, B + k * ldb + j, ldb, base_C + j, ldc);
                     }
                     if (remaining_N > 0) {
-                        kernel_BT_BT_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
+                        kernel_T_T_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
                     }
                 }
             }
@@ -353,10 +353,10 @@ namespace gemm
                 T* base_C = C + i_lim * ldc;
                 for (int k = 0; k < B1<T>; k += TILE_SIZE<T>) {
                     for (int j = 0; j < j_lim; j += TILE_SIZE<T>) {
-                        kernel_M_BT_BT(base_A + k, lda, B + k * ldb + j, ldb, base_C + j, ldc);
+                        kernel_M_T_T(base_A + k, lda, B + k * ldb + j, ldb, base_C + j, ldc);
                     }
                     if (remaining_N > 0) {
-                        kernel_M_BT_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
+                        kernel_M_T_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
                     }
                 }
             }
@@ -413,9 +413,9 @@ namespace gemm
             const int remaining_K = K % TILE_SIZE<T>;
             const int k_lim = K - remaining_K;
 
-            auto kernel_BT_K_BT = get_kernel<T>(TILE_SIZE<T>, TILE_SIZE<T>, remaining_K);
-            auto kernel_M_BT_BT = get_kernel<T>(remaining_M, TILE_SIZE<T>, TILE_SIZE<T>);
-            auto kernel_M_K_BT = get_kernel<T>(remaining_M, TILE_SIZE<T>, remaining_K);
+            auto kernel_T_K_T = get_kernel<T>(TILE_SIZE<T>, TILE_SIZE<T>, remaining_K);
+            auto kernel_M_T_T = get_kernel<T>(remaining_M, TILE_SIZE<T>, TILE_SIZE<T>);
+            auto kernel_M_K_T = get_kernel<T>(remaining_M, TILE_SIZE<T>, remaining_K);
 
 
             for (int i = 0; i < i_lim; i += TILE_SIZE<T>) {
@@ -429,7 +429,7 @@ namespace gemm
                 }
                 if (remaining_K > 0) {
                     for (int j = 0; j < B1<T>; j += TILE_SIZE<T>) {
-                        kernel_BT_K_BT(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
+                        kernel_T_K_T(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
                     }
                 }
             }
@@ -439,12 +439,12 @@ namespace gemm
                 T* base_C = C + i_lim * ldc;
                 for (int k = 0; k < k_lim; k += TILE_SIZE<T>) {
                     for (int j = 0; j < B1<T>; j += TILE_SIZE<T>) {
-                        kernel_M_BT_BT(base_A + k, lda, B + k * ldb + j, ldb, base_C + j, ldc);
+                        kernel_M_T_T(base_A + k, lda, B + k * ldb + j, ldb, base_C + j, ldc);
                     }
                 }
                 if (remaining_K > 0) {
                     for (int j = 0; j < B1<T>; j += TILE_SIZE<T>) {
-                        kernel_M_K_BT(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
+                        kernel_M_K_T(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
                     }
                 }
             }
@@ -508,9 +508,9 @@ namespace gemm
             const int remaining_K = K % TILE_SIZE<T>;
             const int k_lim = K - remaining_K;
 
-            auto kernel_BT_BT_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, TILE_SIZE<T>);
-            auto kernel_BT_K_BT = get_kernel<T>(TILE_SIZE<T>, TILE_SIZE<T>, remaining_K);
-            auto kernel_BT_K_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, remaining_K);
+            auto kernel_T_T_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, TILE_SIZE<T>);
+            auto kernel_T_K_T = get_kernel<T>(TILE_SIZE<T>, TILE_SIZE<T>, remaining_K);
+            auto kernel_T_K_N = get_kernel<T>(TILE_SIZE<T>, remaining_N, remaining_K);
 
 
             for (int i = 0; i < i_lim; i += TILE_SIZE<T>) {
@@ -522,38 +522,38 @@ namespace gemm
                         tile_kernel<T>(a, lda, B + k * ldb + j, ldb, base_C + j, ldc);
                     }
                     if (remaining_N > 0) {
-                        kernel_BT_BT_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
+                        kernel_T_T_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
                     }
                 }
                 if (remaining_K > 0) {
                     for (int j = 0; j < j_lim; j += TILE_SIZE<T>) {
-                        kernel_BT_K_BT(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
+                        kernel_T_K_T(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
                     }
                     if (remaining_N > 0) {
-                        kernel_BT_K_N(base_A + k_lim, lda, B + k_lim * ldb + j_lim, ldb, base_C + j_lim, ldc);
+                        kernel_T_K_N(base_A + k_lim, lda, B + k_lim * ldb + j_lim, ldb, base_C + j_lim, ldc);
                     }
                 }
             }
 
             if (remaining_M > 0) {
-                auto kernel_M_BT_BT = get_kernel<T>(remaining_M, TILE_SIZE<T>, TILE_SIZE<T>);
-                auto kernel_M_BT_N = get_kernel<T>(remaining_M, remaining_N, TILE_SIZE<T>);
-                auto kernel_M_K_BT = get_kernel<T>(remaining_M, TILE_SIZE<T>, remaining_K);
+                auto kernel_M_T_T = get_kernel<T>(remaining_M, TILE_SIZE<T>, TILE_SIZE<T>);
+                auto kernel_M_T_N = get_kernel<T>(remaining_M, remaining_N, TILE_SIZE<T>);
+                auto kernel_M_K_T = get_kernel<T>(remaining_M, TILE_SIZE<T>, remaining_K);
                 auto kernel_M_K_N = get_kernel<T>(remaining_M, remaining_N, remaining_K);
 
                 const T* base_A = A + i_lim * lda;
                 T* base_C = C + i_lim * ldc;
                 for (int k = 0; k < k_lim; k += TILE_SIZE<T>) {
                     for (int j = 0; j < j_lim; j += TILE_SIZE<T>) {
-                        kernel_M_BT_BT(base_A + k, lda, B + k * ldb + j, ldb, base_C + j, ldc);
+                        kernel_M_T_T(base_A + k, lda, B + k * ldb + j, ldb, base_C + j, ldc);
                     }
                     if (remaining_N > 0) {
-                        kernel_M_BT_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
+                        kernel_M_T_N(base_A + k, lda, B + k * ldb + j_lim, ldb, base_C + j_lim, ldc);
                     }
                 }
                 if (remaining_K > 0) {
                     for (int j = 0; j < j_lim; j += TILE_SIZE<T>) {
-                        kernel_M_K_BT(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
+                        kernel_M_K_T(base_A + k_lim, lda, B + k_lim * ldb + j, ldb, base_C + j, ldc);
                     }
                     if (remaining_N > 0) {
                         kernel_M_K_N(base_A + k_lim, lda, B + k_lim * ldb + j_lim, ldb, base_C + j_lim, ldc);
