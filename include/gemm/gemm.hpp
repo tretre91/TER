@@ -40,7 +40,8 @@ namespace gemm
 
         // Size of a tile
         template<typename T>
-        constexpr int TILE_SIZE = eve::wide<T>::size();
+        constexpr int TILE_SIZE = 8;
+        // constexpr int TILE_SIZE = eve::wide<T>::size();
 
         // Size of a small (L1) block
         template<typename T>
