@@ -48,6 +48,10 @@ $ ./build/benchmark/benchmark --reporter=plot::out=metrics.json
 $ python3 benchmark/plot.py metrics.json -o plot.svg
 ```
 
+It gives the following plot for the benchmark run mentionned above:
+
+![](./benchmark/plot.png)
+
 ## TODO
 
 - [x] Integrate the kernels to the main matrix multiplication function

@@ -1,9 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <cblas.h>
 #include <fmt/core.h>
 #include <nanobench.h>
-#include <cblas.h>
 
 #include "util.hpp"
 #include <gemm/gemm.hpp>
@@ -129,37 +129,6 @@ TEST_CASE("Non square", "[large]") {
     }
 }
 
-TEST_CASE("Corner cases", "[square][large]") {
-    using util::bench;
-
-    bench.warmup(0);
-
-    const float alpha = util::random_float<float>();
-    const float beta = util::random_float<float>();
-
-    const int dim = gemm::detail::B2<float> + gemm::detail::B1<float> + gemm::detail::TILE_SIZE<float> + 1;
-
-    CAPTURE(dim);
-    DYNAMIC_SECTION("" << dim << "x" << dim << " * " << dim << "x" << dim) {
-        const auto A = util::random_vector<float>(dim * dim);
-        const auto B = util::random_vector<float>(dim * dim);
-        auto C = util::random_vector<float>(dim * dim);
-        auto oldC = C;
-
-        const auto* ptr_A = A.data();
-        const auto* ptr_B = B.data();
-        auto* ptr_C = C.data();
-
-        bench.title(fmt::format("{0}x{0}", dim));
-        bench.batch(dim * dim);
-
-        bench.run("blas", [=] { cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
-        std::copy(oldC.begin(), oldC.end(), C.begin());
-
-        bench.run("gemm", [=] { gemm::sgemm(util::no_trans, util::no_trans, dim, dim, dim, alpha, ptr_A, dim, ptr_B, dim, beta, ptr_C, dim); });
-    }
-}
-
 TEST_CASE(">= 1024", "[square][large]") {
     using util::bench;
 
@@ -168,7 +137,8 @@ TEST_CASE(">= 1024", "[square][large]") {
     const float alpha = util::random_float<float>();
     const float beta = util::random_float<float>();
 
-    const auto dim = GENERATE(1024, 1327, 2000);
+    // const auto dim = GENERATE(1024, 1327, 2000);
+    const auto dim = GENERATE(1024, 2048);
 
     CAPTURE(dim);
     DYNAMIC_SECTION("" << dim << "x" << dim << " * " << dim << "x" << dim) {
